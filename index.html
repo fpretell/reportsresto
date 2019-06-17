@@ -1,0 +1,311 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Reportes Toteat</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/datepicker.css">
+</head>
+
+<body ng-controller="reports">
+  <div class="jumbotron text-center" >
+    <h1>Reportes Toteat</h1>
+    <p>Reportes para el Sistema de Gastronomía! {{greetMe}}</p>
+  </div>
+
+  <div class="container">
+
+    <div class="col-md-12">
+      <div class='col-md-5'>
+          <div class="form-group">
+              <label for="datetimepicker1">Desde</label>
+              <div class='input-group date' id='datetimepicker1'>
+                  <input type="text" datepicker="" class="form-control" ng-model="date_from" dp-format="dd/mm/yyyy" init-date="01/01/2019"/>
+                  <span class="input-group-addon">
+                      <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+              </div>
+          </div>
+      </div>
+      <div class='col-md-5'>
+          <div class="form-group">
+              <label for="datetimepicker2">Hasta</label>
+              <div class='input-group date' id='datetimepicker2'>
+                  <input type="text" datepicker="" class="form-control" ng-model="date_to" dp-format="dd/mm/yyyy" init-date="31/03/2019"/>
+                  <span class="input-group-addon">
+                      <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+              </div>
+          </div>
+      </div>
+      <div class='col-md-2'>
+        <label>&nbsp;</label>
+        <div class="form-group">
+          <button ng-click="setDataset()" type="button" class="btn btn-info">Calcular</button>
+        </div>
+      </div>
+  </div>
+  <div class="col-md-12">
+    <div class="alert alert-warning" ng-show="warningDates">
+      <strong>Advertencia!</strong> Ingrese las fechas.
+    </div>
+    <div class="alert alert-warning" ng-show="warningNotResults">
+      <strong>Advertencia!</strong> La búsqueda no produjo resultados. Intente con otro Rango de fechas.
+    </div>
+
+    <hr>
+  </div>
+
+  <h2>Resumen de Ventas</h2>
+  <button ng-model="modResumen" ng-click="reportResumen()" type="button" class="btn btn-info">Ver</button>
+  <div id="resumen" ng-show="modResumen">
+    <div class="divtable">
+
+      <h3>Venta Total del Período: <span ng-model="totalSales" class="label label-default">{{totalSales | currencyCL}}</span></h3>
+      <h3>Ordenes Totales del Período: <span ng-model="totalOrders" class="label label-default">{{totalOrders}}</span></h3>
+      <table id="tblSales" class="table table-bordered">
+        <thead style="text-align:center">
+          <tr>
+            <th class="text-center" rowspan="3" scope="col" >Fecha</th>
+            <th class="text-center" rowspan="3" scope="col">Total</th>
+            <th class="text-center" rowspan="3" scope="col">Ordenes</th>
+            <th class="text-center" rowspan="3" scope="col">Clientes</th>
+            <th class="text-center" colspan="6" scope="col">Pagos</th>
+          </tr>
+          <tr>
+            <th class="text-center" colspan="2" scope="col" >Efectivo</th>
+            <th class="text-center" colspan="2" scope="col">Débito</th>
+            <th class="text-center" colspan="2" scope="col">Crédito</th>
+          </tr>
+          <tr>
+            <th class="text-center" scope="col">Monto</th>
+            <th class="text-center" scope="col">Transacciones</th>
+            <th class="text-center" scope="col">Monto</th>
+            <th class="text-center" scope="col">Transacciones</th>
+            <th class="text-center" scope="col">Monto</th>
+            <th class="text-center" scope="col">Transacciones</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in countR">
+              <th class="text-center" scope="row">{{r.name | dateddmmyyyy}}</th>
+              <td class="text-center">{{r.total | currencyCL}}</td>
+              <td class="text-center">{{r.orders}}</td>
+              <td class="text-center">{{r.diners}}</td>
+              <td class="text-right">{{r.payments.efectivo.total | currencyCL}}</td>
+              <td class="text-center">{{r.payments.efectivo.transactions}}</td>
+              <td class="text-right">{{r.payments.debito.total | currencyCL}}</td>
+              <td class="text-center">{{r.payments.debito.transactions}}</td>
+              <td class="text-right">{{r.payments.credito.total | currencyCL}}</td>
+              <td class="text-center">{{r.payments.credito.transactions}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Reporte de Camareros</h2>
+  <button ng-model="modWaiters" ng-click="reportWaiters()" type="button" class="btn btn-info">Ver</button>
+  <div id="waiters" ng-show="modWaiters">
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por número de  Ordenes</th>
+            <th scope="col">Ordenes</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in countW">
+              <td>{{r.name}}</td>
+              <td>{{r.count}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por Ventas</th>
+            <th scope="col">Venta</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in totalW">
+              <td>{{r.name}}</td>
+              <td>{{r.total | currencyCL}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Reporte de Cajeros</h2>
+  <button ng-model="modCashiers" ng-click="reportCashiers()" type="button" class="btn btn-info">Ver</button>
+  <div id="cashiers" ng-show="modCashiers">
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por número de Ordenes</th>
+            <th scope="col">Ordenes</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in countC">
+              <td>{{r.name}}</td>
+              <td>{{r.count}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por Ventas</th>
+            <th scope="col">Venta</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in totalC">
+              <td>{{r.name}}</td>
+              <td>{{r.total | currencyCL}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <h2>Reporte por Productos</h2>
+  <button ng-model="modProducts" ng-click="reportProducts()" type="button" class="btn btn-info" data-target="#products">Ver</button>
+  <div id="products" ng-show="modProducts">
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por número de Ordenes</th>
+            <th scope="col">Ordenes</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in countP">
+              <td>{{r.name}}</td>
+              <td>{{r.count}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por Ventas</th>
+            <th scope="col">Venta</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in totalP">
+              <td>{{r.name}}</td>
+              <td>{{r.total | currencyCL}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Reporte por Zona</h2>
+  <button ng-model="modZones" ng-click="reportZones()" type="button" class="btn btn-info">Ver</button>
+  <div id="zones" ng-show="modZones">
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por número de Ordenes</th>
+            <th scope="col">Ordenes</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in countZ">
+              <td>{{r.name}}</td>
+              <td>{{r.count}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por Ventas</th>
+            <th scope="col">Venta</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in totalZ">
+              <td>{{r.name}}</td>
+              <td>{{r.total | currencyCL}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Reporte por Mesa</h2>
+  <button ng-model="modTables" ng-click="reportTables()" type="button" class="btn btn-info">Ver</button>
+  <div id="tables" ng-show="modTables">
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por número de Ordenes</th>
+            <th scope="col">Ordenes</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in countT">
+              <td>{{r.name}}</td>
+              <td>{{r.count}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divtable">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Ordenados por Ventas</th>
+            <th scope="col">Venta</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in totalT">
+              <td>{{r.name}}</td>
+              <td>{{r.total | currencyCL}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <hr>
+  </div>
+
+</body>
+<script src="js/data.js"></script>
+<script src="js/controller.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+<script src="js/controller-ng.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src="js/datepicker.js"></script>
+
+</html>

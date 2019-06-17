@@ -9,8 +9,10 @@ Esta es una aplicación que proporciona reportes básicos sobre un modelo de neg
 Este proyecto actualmente trabaja con:
 
 * AngularJS 1.7
+* Bootstrap 3.4 (para mantener estilos)
 * Javascript
 * HTML
+* Jquery 2.2 (para dar soporte a bootstrap)
 
 Por lo tanto el único requisito para ejecutar el proyecto es un navegador compatible como:
 

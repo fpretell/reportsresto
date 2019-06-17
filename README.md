@@ -1,4 +1,4 @@
-# fpretell/restaurant
+# fpretell/reportsresto
 
 ## Descripción
 
@@ -8,6 +8,7 @@ Esta es una aplicación que proporciona reportes básicos sobre un modelo de neg
 
 Este proyecto actualmente trabaja con:
 
+* AngularJS 1.7
 * Javascript
 * HTML
 
